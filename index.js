@@ -109,10 +109,19 @@ var normalize = function(data) {
     if (opts.file && !tm.absolute(opts.file)) opts.base = tm.parse(data.id).dirname;
 
     var fields = new mapnik.Datasource(opts).describe().fields;
-    info.fields = _(fields).reduce(function(memo, type, field) {
-      memo[field] = l.fields[field] || type;
-      return memo;
-    }, {});
+
+    if ('columns' in l) {
+      info.fields = l.columns;
+      console.log("Using columns for layer ", l.id, l.columns);
+    } else {
+      console.log("Querying DB for columns for ", l.id);
+      // Get from mapnik
+      var fields = new mapnik.Datasource(opts).describe().fields;
+      info.fields = _(fields).reduce(function(memo, type, field) {
+        memo[field] = l.fields[field] || type;
+        return memo;
+      }, {});
+    }
     return info;
   });
   return data;
